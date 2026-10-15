@@ -1,0 +1,110 @@
+[
+  {
+    "id": "txn_0001",
+    "description": "Lunch at cafeteria",
+    "amount": 12.50,
+    "category": "Food",
+    "date": "2025-09-25",
+    "createdAt": "2025-09-25T10:30:00.000Z",
+    "updatedAt": "2025-09-25T10:30:00.000Z"
+  },
+  {
+    "id": "txn_0002",
+    "description": "Chemistry textbook",
+    "amount": 89.99,
+    "category": "Books",
+    "date": "2025-09-23",
+    "createdAt": "2025-09-23T09:00:00.000Z",
+    "updatedAt": "2025-09-23T09:00:00.000Z"
+  },
+  {
+    "id": "txn_0003",
+    "description": "Monthly bus pass",
+    "amount": 45.00,
+    "category": "Transport",
+    "date": "2025-09-01",
+    "createdAt": "2025-09-01T08:00:00.000Z",
+    "updatedAt": "2025-09-01T08:00:00.000Z"
+  },
+  {
+    "id": "txn_0004",
+    "description": "Coffee with friends",
+    "amount": 8.75,
+    "category": "Entertainment",
+    "date": "2025-09-28",
+    "createdAt": "2025-09-28T14:00:00.000Z",
+    "updatedAt": "2025-09-28T14:00:00.000Z"
+  },
+  {
+    "id": "txn_0005",
+    "description": "Semester registration fees",
+    "amount": 350.00,
+    "category": "Fees",
+    "date": "2025-09-02",
+    "createdAt": "2025-09-02T07:30:00.000Z",
+    "updatedAt": "2025-09-02T07:30:00.000Z"
+  },
+  {
+    "id": "txn_0006",
+    "description": "Grocery shopping",
+    "amount": 0.99,
+    "category": "Food",
+    "date": "2025-09-27",
+    "createdAt": "2025-09-27T18:00:00.000Z",
+    "updatedAt": "2025-09-27T18:00:00.000Z"
+  },
+  {
+    "id": "txn_0007",
+    "description": "Uber ride to campus",
+    "amount": 14.30,
+    "category": "Transport",
+    "date": "2025-09-26",
+    "createdAt": "2025-09-26T08:15:00.000Z",
+    "updatedAt": "2025-09-26T08:15:00.000Z"
+  },
+  {
+    "id": "txn_0008",
+    "description": "Cinema ticket",
+    "amount": 18.00,
+    "category": "Entertainment",
+    "date": "2025-09-20",
+    "createdAt": "2025-09-20T19:00:00.000Z",
+    "updatedAt": "2025-09-20T19:00:00.000Z"
+  },
+  {
+    "id": "txn_0009",
+    "description": "Advanced calculus notes",
+    "amount": 5.00,
+    "category": "Books",
+    "date": "2025-09-15",
+    "createdAt": "2025-09-15T11:00:00.000Z",
+    "updatedAt": "2025-09-15T11:00:00.000Z"
+  },
+  {
+    "id": "txn_0010",
+    "description": "Stationery supplies",
+    "amount": 22.49,
+    "category": "Other",
+    "date": "2025-09-10",
+    "createdAt": "2025-09-10T13:00:00.000Z",
+    "updatedAt": "2025-09-10T13:00:00.000Z"
+  },
+  {
+    "id": "txn_0011",
+    "description": "Tea at library cafe",
+    "amount": 3.50,
+    "category": "Food",
+    "date": "2025-09-29",
+    "createdAt": "2025-09-29T09:45:00.000Z",
+    "updatedAt": "2025-09-29T09:45:00.000Z"
+  },
+  {
+    "id": "txn_0012",
+    "description": "Lab manual printing",
+    "amount": 99999.99,
+    "category": "Fees",
+    "date": "2025-01-01",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+]
