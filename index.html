@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Finance Tracker</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+
+  <!-- Skip to main content (a11y) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">💰</span>
+        <span class="brand-name">Student Finance Tracker</span>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== NAV ===== -->
+  <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+    <ul role="list">
+      <li><a href="#section-dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+      <li><a href="#section-transactions" class="nav-link" data-section="transactions">Transactions</a></li>
+      <li><a href="#section-add" class="nav-link" data-section="add">Add / Edit</a></li>
+      <li><a href="#section-settings" class="nav-link" data-section="settings">Settings</a></li>
+      <li><a href="#section-about" class="nav-link" data-section="about">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== MAIN ===== -->
+  <main id="main-content" class="main-content" tabindex="-1">
+
+    <!-- ARIA live region for status messages -->
+    <div id="status-msg" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    <div id="alert-msg" role="alert" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+    <!-- ── DASHBOARD ── -->
+    <section id="section-dashboard" class="page-section active" aria-labelledby="h-dashboard">
+      <h1 id="h-dashboard">Dashboard</h1>
+
+      <div class="stats-grid">
+        <article class="stat-card" aria-label="Total transactions">
+          <span class="stat-label">Total Records</span>
+          <span class="stat-value" id="stat-total">0</span>
+        </article>
+        <article class="stat-card" aria-label="Total spending">
+          <span class="stat-label">Total Spent</span>
+          <span class="stat-value" id="stat-sum">$0.00</span>
+        </article>
+        <article class="stat-card" aria-label="Top category">
+          <span class="stat-label">Top Category</span>
+          <span class="stat-value" id="stat-top-cat">—</span>
+        </article>
+        <article class="stat-card" aria-label="Budget remaining">
+          <span class="stat-label">Budget Left</span>
+          <span class="stat-value" id="stat-budget-left">$0.00</span>
+        </article>
+      </div>
+
+      <!-- Budget cap progress -->
+      <div class="budget-bar-wrap" aria-label="Budget usage">
+        <div class="budget-bar-labels">
+          <span>Spent</span>
+          <span id="budget-bar-pct">0%</span>
+          <span>Cap: <strong id="budget-cap-label">$1000.00</strong></span>
+        </div>
+        <div class="budget-bar-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-labelledby="h-dashboard">
+          <div class="budget-bar-fill" id="budget-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Last 7 days trend chart -->
+      <section class="trend-section" aria-labelledby="h-trend">
+        <h2 id="h-trend">Last 7 Days</h2>
+        <div class="trend-chart" id="trend-chart" aria-label="Bar chart of spending over the last 7 days" role="img"></div>
+      </section>
+    </section>
+
+    <!-- ── TRANSACTIONS ── -->
+    <section id="section-transactions" class="page-section" aria-labelledby="h-transactions">
+      <h1 id="h-transactions">Transactions</h1>
+
+      <!-- Search & filter toolbar -->
+      <div class="toolbar" role="search">
+        <div class="search-wrap">
+          <label for="search-input" class="sr-only">Search transactions (regex)</label>
+          <input type="search" id="search-input" class="search-input" placeholder="Search (regex)…" autocomplete="off" />
+          <label class="toggle-label">
+            <input type="checkbox" id="search-case" />
+            <span>Case sensitive</span>
+          </label>
+        </div>
+        <div class="filter-wrap">
+          <label for="filter-category" class="sr-only">Filter by category</label>
+          <select id="filter-category" class="select-input">
+            <option value="">All Categories</option>
+          </select>
+          <label for="sort-select" class="sr-only">Sort by</label>
+          <select id="sort-select" class="select-input">
+            <option value="date-desc">Date (Newest)</option>
+            <option value="date-asc">Date (Oldest)</option>
+            <option value="desc-asc">Description A→Z</option>
+            <option value="desc-desc">Description Z→A</option>
+            <option value="amount-asc">Amount ↑</option>
+            <option value="amount-desc">Amount ↓</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Search error feedback -->
+      <p id="search-error" class="field-error" aria-live="polite" hidden></p>
+
+      <!-- Records table (desktop) / cards (mobile) -->
+      <div id="records-container" class="records-container">
+        <p class="empty-state" id="empty-state">No transactions yet. <a href="#section-add" data-section="add">Add one!</a></p>
+      </div>
+
+      <!-- Import / Export -->
+      <div class="io-bar">
+        <button id="btn-export" class="btn btn-secondary">Export JSON</button>
+        <label class="btn btn-secondary" for="import-file">
+          Import JSON
+          <input type="file" id="import-file" accept=".json" class="sr-only" />
+        </label>
+      </div>
+    </section>
+
+    <!-- ── ADD / EDIT FORM ── -->
+    <section id="section-add" class="page-section" aria-labelledby="h-add">
+      <h1 id="h-add">Add Transaction</h1>
+
+      <form id="transaction-form" class="transaction-form" novalidate aria-label="Transaction form">
+        <input type="hidden" id="edit-id" />
+
+        <div class="form-group">
+          <label for="f-description">Description <span aria-hidden="true">*</span></label>
+          <input type="text" id="f-description" name="description" required
+                 autocomplete="off" aria-describedby="err-description" />
+          <span id="err-description" class="field-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="f-amount">Amount (USD) <span aria-hidden="true">*</span></label>
+          <input type="text" id="f-amount" name="amount" required
+                 inputmode="decimal" autocomplete="off" aria-describedby="err-amount" />
+          <span id="err-amount" class="field-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="f-category">Category <span aria-hidden="true">*</span></label>
+          <select id="f-category" name="category" required aria-describedby="err-category">
+            <option value="">— Select —</option>
+            <option value="Food">Food</option>
+            <option value="Books">Books</option>
+            <option value="Transport">Transport</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Fees">Fees</option>
+            <option value="Other">Other</option>
+          </select>
+          <span id="err-category" class="field-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="f-date">Date <span aria-hidden="true">*</span></label>
+          <input type="date" id="f-date" name="date" required aria-describedby="err-date" />
+          <span id="err-date" class="field-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btn-submit">Add Transaction</button>
+          <button type="button" class="btn btn-ghost" id="btn-cancel" hidden>Cancel Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── SETTINGS ── -->
+    <section id="section-settings" class="page-section" aria-labelledby="h-settings">
+      <h1 id="h-settings">Settings</h1>
+
+      <form id="settings-form" class="settings-form" novalidate aria-label="Settings form">
+
+        <fieldset>
+          <legend>Budget Cap</legend>
+          <div class="form-group">
+            <label for="s-budget-cap">Monthly Cap (USD)</label>
+            <input type="text" id="s-budget-cap" name="budgetCap" value="1000"
+                   inputmode="decimal" aria-describedby="err-budget-cap" />
+            <span id="err-budget-cap" class="field-error" role="alert" aria-live="polite"></span>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Currency Rates (manual)</legend>
+          <p class="fieldset-hint">Set exchange rates relative to 1 USD.</p>
+          <div class="form-group">
+            <label for="s-rate-eur">1 USD = ? EUR</label>
+            <input type="text" id="s-rate-eur" name="rateEUR" value="0.92"
+                   inputmode="decimal" aria-describedby="err-rate-eur" />
+            <span id="err-rate-eur" class="field-error" role="alert" aria-live="polite"></span>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Categories</legend>
+          <p class="fieldset-hint">Comma-separated list of categories.</p>
+          <div class="form-group">
+            <label for="s-categories">Categories</label>
+            <input type="text" id="s-categories" name="categories"
+                   value="Food,Books,Transport,Entertainment,Fees,Other"
+                   aria-describedby="err-categories" />
+            <span id="err-categories" class="field-error" role="alert" aria-live="polite"></span>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+          <button type="button" class="btn btn-danger" id="btn-clear-data">Clear All Data</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── ABOUT ── -->
+    <section id="section-about" class="page-section" aria-labelledby="h-about">
+      <h1 id="h-about">About</h1>
+      <div class="about-card">
+        <p>
+          <strong>Student Finance Tracker</strong> helps students log, categorise, and analyse
+          their daily spending. Track budgets, search transactions with regex, and export your
+          data at any time — all stored locally in your browser.
+        </p>
+        <h2>Contact</h2>
+        <ul class="contact-list">
+          <li>
+            <a href="https://github.com/" target="_blank" rel="noopener noreferrer"
+               aria-label="GitHub profile (opens in new tab)">
+              GitHub
+            </a>
+          </li>
+          <li>
+            <a href="mailto:student@example.com" aria-label="Send email">
+              student@example.com
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer" role="contentinfo">
+    <p>&copy; <span id="footer-year"></span> Student Finance Tracker</p>
+  </footer>
+
+  <script type="moduLe" src="scripts/main.js"></script>
+</body>
+</html>
