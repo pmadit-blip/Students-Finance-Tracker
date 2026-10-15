@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tests — Student Finance Tracker</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+    h1   { color: #1B2A4A; }
+    h2   { color: #2C3E6B; margin-top: 2rem; border-bottom: 2px solid #D1D9E6; padding-bottom: .4rem; }
+    .pass { color: #2E7D32; }
+    .fail { color: #C62828; font-weight: bold; }
+    .result { font-family: monospace; font-size: .9rem; margin: .25rem 0; }
+    #summary { margin-top: 2rem; font-size: 1.1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Test Suite</h1>
+  <p>Open browser console for full output. Results render below.</p>
+  <div id="output"></div>
+  <div id="summary"></div>
+
+<script type="module">
+import {
+  validateDescription, validateAmount, validateDate,
+  validateCategory, validateBudgetCap, validateRate,
+  RE_DUPLICATE_WORD,
+} from './scripts/validators.js';
+import { compileRegex, highlight, matchesSearch } from './scripts/search.js';
+
+const out     = document.getElementById('output');
+let passed = 0, failed = 0;
+
+function assert(label, condition) {
+  const ok = Boolean(condition);
+  ok ? passed++ : failed++;
+  const p = document.createElement('p');
+  p.className = `result ${ok ? 'pass' : 'fail'}`;
+  p.textContent = `${ok ? '✓' : '✗'} ${label}`;
+  out.appendChild(p);
+}
+
+function section(title) {
+  const h = document.createElement('h2');
+  h.textContent = title;
+  out.appendChild(h);
+}
+
+// ── validateDescription ────────────────────────────────────
+section('validateDescription');
+assert('valid description',                  validateDescription('Lunch at cafeteria') === null);
+assert('empty string → error',               validateDescription('') !== null);
+assert('leading space → error',              validateDescription(' Lunch') !== null);
+assert('trailing space → error',             validateDescription('Lunch ') !== null);
+assert('single word valid',                  validateDescription('Coffee') === null);
+assert('duplicate word → error',             validateDescription('the the coffee') !== null);
+assert('over 120 chars → error',             validateDescription('a'.repeat(121)) !== null);
+
+// ── validateAmount ─────────────────────────────────────────
+section('validateAmount');
+assert('integer valid',                      validateAmount('12') === null);
+assert('decimal valid',                      validateAmount('12.50') === null);
+assert('zero valid',                         validateAmount('0') === null);
+assert('empty → error',                      validateAmount('') !== null);
+assert('negative → error',                   validateAmount('-5') !== null);
+assert('three decimals → error',             validateAmount('1.123') !== null);
+assert('letters → error',                    validateAmount('abc') !== null);
+assert('leading zero → error',               validateAmount('01') !== null);
+assert('max boundary valid',                 validateAmount('99999.99') === null);
+assert('over max → error',                   validateAmount('100000') !== null);
+
+// ── validateDate ───────────────────────────────────────────
+section('validateDate');
+assert('valid date',                         validateDate('2025-09-25') === null);
+assert('empty → error',                      validateDate('') !== null);
+assert('wrong format → error',               validateDate('25-09-2025') !== null);
+assert('invalid month 13 → error',           validateDate('2025-13-01') !== null);
+assert('invalid day 00 → error',             validateDate('2025-09-00') !== null);
+assert('edge: Jan 1st valid',                validateDate('2025-01-01') === null);
+assert('edge: Dec 31st valid',               validateDate('2025-12-31') === null);
+
+// ── validateCategory ──────────────────────────────────────
+section('validateCategory');
+assert('valid category',                     validateCategory('Food') === null);
+assert('empty → error',                      validateCategory('') !== null);
+
+// ── validateBudgetCap ─────────────────────────────────────
+section('validateBudgetCap');
+assert('valid cap',                          validateBudgetCap('1000') === null);
+assert('decimal cap valid',                  validateBudgetCap('999.99') === null);
+assert('empty → error',                      validateBudgetCap('') !== null);
+assert('letters → error',                    validateBudgetCap('abc') !== null);
+
+// ── validateRate ──────────────────────────────────────────
+section('validateRate');
+assert('valid rate',                         validateRate('0.92') === null);
+assert('zero rate → error',                  validateRate('0') !== null);
+assert('empty → error',                      validateRate('') !== null);
+
+// ── RE_DUPLICATE_WORD (advanced back-reference) ────────────
+section('RE_DUPLICATE_WORD (back-reference)');
+assert('detects "the the"',                  RE_DUPLICATE_WORD.test('the the coffee'));
+assert('detects "coffee coffee"',            RE_DUPLICATE_WORD.test('I had coffee coffee'));
+assert('no duplicate → no match',            !RE_DUPLICATE_WORD.test('I had coffee'));
+assert('case-insensitive: "The the"',        RE_DUPLICATE_WORD.test('The the book'));
+
+// ── compileRegex ──────────────────────────────────────────
+section('compileRegex');
+assert('valid pattern returns RegExp',       compileRegex('food') instanceof RegExp);
+assert('empty string returns null',          compileRegex('') === null);
+assert('invalid pattern returns null',       compileRegex('[invalid') === null);
+assert('case-insensitive by default',        compileRegex('food').flags.includes('i'));
+assert('case-sensitive when requested',      !compileRegex('food', true).flags.includes('i'));
+
+// ── highlight ─────────────────────────────────────────────
+section('highlight');
+const re = compileRegex('coffee');
+assert('wraps match in <mark>',              highlight('Coffee shop', re).includes('<mark>'));
+assert('no regex → plain escaped text',      highlight('Coffee shop', null) === 'Coffee shop');
+assert('escapes HTML < >',                   highlight('<script>', null) === '&lt;script&gt;');
+assert('does not double-escape marks',       !highlight('Coffee', re).includes('&lt;mark&gt;'));
+
+// ── matchesSearch ─────────────────────────────────────────
+section('matchesSearch');
+const rec = { description: 'Coffee with friends', category: 'Entertainment', date: '2025-09-28', amount: 8.75 };
+assert('matches description',                matchesSearch(rec, compileRegex('coffee')));
+assert('matches category',                   matchesSearch(rec, compileRegex('entertainment')));
+assert('matches date',                       matchesSearch(rec, compileRegex('2025')));
+assert('no match returns false',             !matchesSearch(rec, compileRegex('xyz123')));
+assert('null regex → always true',           matchesSearch(rec, null));
+
+// ── Summary ───────────────────────────────────────────────
+const summary = document.getElementById('summary');
+summary.textContent = `Results: ${passed} passed, ${failed} failed out of ${passed + failed} tests.`;
+summary.style.color = failed === 0 ? '#2E7D32' : '#C62828';
+</script>
+</body>
+</html>
