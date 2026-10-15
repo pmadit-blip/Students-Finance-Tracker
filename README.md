@@ -2,8 +2,8 @@
 
 A fully accessible, responsive, vanilla HTML/CSS/JS single-page application for tracking student spending. No frameworks, no build tools, no dependencies — just clean, modular JavaScript.
 
-**Live Demo:** [https://your-username.github.io/Students-Finance-Tracker-2](https://your-username.github.io/Students-Finance-Tracker-2)  
-**Repository:** [https://github.com/your-username/Students-Finance-Tracker-2](https://github.com/your-username/Students-Finance-Tracker-2)
+**Live Demo:** [https://pmadit-blip.github.io/Students-Finance-Tracker-2](https://pmadit-blip.github.io/Students-Finance-Tracker-2)  
+**Repository:** [https://github.com/pmadit-blip/Students-Finance-Tracker-2](https://github.com/pmadit-blip/Students-Finance-Tracker-2)
 
 ---
 
@@ -17,7 +17,7 @@ A fully accessible, responsive, vanilla HTML/CSS/JS single-page application for 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/Students-Finance-Tracker-2.git
+   git clone https://github.com/pmadit-blip/Students-Finance-Tracker-2.git
    cd Students-Finance-Tracker-2
    ```
 
