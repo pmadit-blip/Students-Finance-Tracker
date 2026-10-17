@@ -20,7 +20,7 @@ A fully accessible, responsive, vanilla HTML/CSS/JS single-page application for 
    ```
 
 2. **Open in browser:**  
-   Double-click `index.html` or open it in Chrome, Firefox, or Edge.  
+   Double-click `index.html` or open it in the Chrome, Firefox, or Edge.  
    No build step or server required.
 
 3. **Load sample data:**  
