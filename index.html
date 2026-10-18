@@ -82,7 +82,7 @@
       <!-- Last 7 days trend chart -->
       <section class="trend-section" aria-labelledby="h-trend">
         <h2 id="h-trend">Last 7 Days</h2>
-        <div class="trend-chart" id="trend-chart" aria-label="Bar chart of spending over the last 7 days" role="img"></div>
+        <div class="trend-chart" id="trend-chart"></div>
       </section>
     </section>
 
@@ -111,6 +111,8 @@
             <option value="date-asc">Date (Oldest)</option>
             <option value="desc-asc">Description A→Z</option>
             <option value="desc-desc">Description Z→A</option>
+            <option value="category-asc">Category A→Z</option>
+            <option value="category-desc">Category Z→A</option>
             <option value="amount-asc">Amount ↑</option>
             <option value="amount-desc">Amount ↓</option>
           </select>
@@ -137,7 +139,7 @@
 
     <!-- ── ADD / EDIT FORM ── -->
     <section id="section-add" class="page-section" aria-labelledby="h-add">
-      <h1 id="h-add">Add Transaction</h1>
+      <h1 id="h-add">Add the Transaction</h1>
 
       <form id="transaction-form" class="transaction-form" novalidate aria-label="Transaction form">
         <input type="hidden" id="edit-id" />
@@ -177,7 +179,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary" id="btn-submit">Add Transaction</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit">Add Transactions</button>
           <button type="button" class="btn btn-ghost" id="btn-cancel" hidden>Cancel Edit</button>
         </div>
       </form>
@@ -208,6 +210,20 @@
                    inputmode="decimal" aria-describedby="err-rate-eur" />
             <span id="err-rate-eur" class="field-error" role="alert" aria-live="polite"></span>
           </div>
+          <div class="form-group">
+            <label for="s-rate-kes">1 USD = ? KES</label>
+            <input type="text" id="s-rate-kes" name="rateKES" value="129.5"
+                   inputmode="decimal" aria-describedby="err-rate-kes" />
+            <span id="err-rate-kes" class="field-error" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label for="s-display-currency">Display currency</label>
+            <select id="s-display-currency" name="displayCurrency">
+              <option value="USD">USD — US Dollar</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="KES">KES — Kenyan Shilling</option>
+            </select>
+          </div>
         </fieldset>
 
         <fieldset>
@@ -216,7 +232,7 @@
           <div class="form-group">
             <label for="s-categories">Categories</label>
             <input type="text" id="s-categories" name="categories"
-                   value="Food,Books,Transport,Entertainment,Fees,Other"
+                   value="Food,Books,Transport,Entertainments,Fees,Others"
                    aria-describedby="err-categories" />
             <span id="err-categories" class="field-error" role="alert" aria-live="polite"></span>
           </div>
@@ -234,9 +250,9 @@
       <h1 id="h-about">About</h1>
       <div class="about-card">
         <p>
-          <strong>Student Finance Tracker</strong> helps students log, categorise, and analyse
-          their daily spending. Track budgets, search transactions with regex, and export your
-          data at any time — all stored locally in your browser.
+          <strong>Students Finance Tracker</strong> helps to students log, categorise and analyse
+          their daily spendings. Track budgets, search transactions with regex and export your
+          data at any time, all stored locally in your browser.
         </p>
         <h2>Contact</h2>
         <ul class="contact-list">
@@ -259,7 +275,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer class="site-footer" role="contentinfo">
-    <p>&copy; <span id="footer-year"></span> Student Finance Tracker</p>
+    <p>&copy; <span id="footer-year"></span> Students Finance Tracker</p>
   </footer>
 
   <script type="moduLe" src="scripts/main.js"></script>
