@@ -41,7 +41,7 @@ All 40+ assertions render on-page with ✓ / ✗ indicators and a final pass/fai
 | **Transactions** | Sortable table (desktop) / cards (mobile), live regex search with `<mark>` highlight, category filter |
 | **Add / Edit** | Form with real-time per-field validation; edit pre-fills all fields; Cancel restores previous state |
 | **Delete** | Confirm dialog before deletion; focus managed; `Escape` to dismiss |
-| **Settings** | Adjustable budget cap, EUR exchange rate, editable category list |
+| **Settings** | Adjustable budget cap, manual USD-to-EUR and USD-to-KES rates, selectable USD/EUR/KES display currency, editable category list |
 | **Import / Export** | JSON round-trip with structural validation and descriptive error messages |
 | **Persistence** | All records and settings auto-saved to `localStorage` across sessions |
 | **Accessibility** | Skip link, ARIA landmarks, live regions (polite + assertive), visible focus ring, full keyboard flow |
@@ -142,11 +142,15 @@ Settings are stored separately under the key `sft:settings`:
 
 ```json
 {
-  "budgetCap":  1000,
-  "rateEUR":    0.92,
-  "categories": ["Food", "Books", "Transport", "Entertainment", "Fees", "Other"]
+  "budgetCap":       1000,
+  "rateEUR":         0.92,
+  "rateKES":         129.5,
+  "displayCurrency": "USD",
+  "categories":      ["Food", "Books", "Transport", "Entertainment", "Fees", "Other"]
 }
 ```
+
+Transaction amounts remain stored in USD. Dashboard totals and transaction amounts are converted for display using the manually configured rate for the selected display currency.
 
 ---
 
@@ -166,7 +170,7 @@ Settings are stored separately under the key `sft:settings`:
 
 ## Demo Video
 
-[Unlisted YouTube/Drive link — added before submission]
+[Watch Demo Video](YOUR_UNLISTED_YOUTUBE_OR_DRIVE_LINK_HERE)
 
 The video covers:
 - Keyboard-only navigation through all sections
