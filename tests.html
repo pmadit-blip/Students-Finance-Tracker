@@ -23,7 +23,7 @@
 <script type="module">
 import {
   validateDescription, validateAmount, validateDate,
-  validateCategory, validateBudgetCap, validateRate,
+  validateCategory, validateCategoryName, validateBudgetCap, validateRate,
   RE_DUPLICATE_WORD,
 } from './scripts/validators.js';
 import { compileRegex, highlight, matchesSearch } from './scripts/search.js';
@@ -83,6 +83,12 @@ assert('edge: Dec 31st valid',               validateDate('2025-12-31') === null
 section('validateCategory');
 assert('valid category',                     validateCategory('Food') === null);
 assert('empty → error',                      validateCategory('') !== null);
+
+// ── validateCategoryName ──────────────────────────────────
+section('validateCategoryName');
+assert('letters, spaces, and hyphens valid', validateCategoryName('Self Care') === null);
+assert('digits → error',                      validateCategoryName('Books123') !== null);
+assert('underscores → error',                 validateCategoryName('Self_Care') !== null);
 
 // ── validateBudgetCap ─────────────────────────────────────
 section('validateBudgetCap');
