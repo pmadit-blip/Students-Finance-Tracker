@@ -68,7 +68,8 @@
 .select-input,
 .transaction-form input,
 .transaction-form select,
-.settings-form input {
+.settings-form input,
+.settings-form select {
   width: 100%;
   padding: var(--sp-2) var(--sp-3);
   border: var(--border);
@@ -82,13 +83,15 @@
 .select-input:focus,
 .transaction-form input:focus,
 .transaction-form select:focus,
-.settings-form input:focus {
+.settings-form input:focus,
+.settings-form select:focus {
   border-color: var(--clr-accent);
   box-shadow: 0 0 0 3px rgba(240,165,0,.20);
   outline: none;
 }
 
 .transaction-form input[aria-invalid="true"],
+.transaction-form select[aria-invalid="true"],
 .settings-form input[aria-invalid="true"] {
   border-color: var(--clr-danger);
   box-shadow: 0 0 0 3px rgba(198,40,40,.15);
@@ -111,6 +114,7 @@ label {
   font-weight: 400;
   color: var(--clr-text-muted);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 /* ── Stat Cards ── */
@@ -291,7 +295,7 @@ label {
 .record-card-amount {
   font-weight: 700;
   font-size: var(--fs-lg);
-  color: var(--clr-success);
+  color: var(--clr-text);
   white-space: nowrap;
 }
 
