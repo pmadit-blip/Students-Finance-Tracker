@@ -4,7 +4,9 @@ import {
   getRecords, addRecord, updateRecord, deleteRecord,
   getSettings, updateSettings, getStats, importJSON, exportJSON,
 } from './state.js';
-import { validateForm, validateBudgetCap, validateRate } from './validators.js';
+import {
+  validateForm, validateBudgetCap, validateRate, validateCategoryName,
+} from './validators.js';
 import { compileRegex, highlight, matchesSearch } from './search.js';
 
 // ── DOM refs ───────────────────────────────────────────────
@@ -52,8 +54,18 @@ const hAdd        = document.getElementById('h-add');
 const settingsForm  = document.getElementById('settings-form');
 const sBudgetCap    = document.getElementById('s-budget-cap');
 const sRateEUR      = document.getElementById('s-rate-eur');
+const sRateKES      = document.getElementById('s-rate-kes');
+const sDisplayCurrency = document.getElementById('s-display-currency');
 const sCategories   = document.getElementById('s-categories');
 const btnClearData  = document.getElementById('btn-clear-data');
+
+let lastBudgetAnnouncementSum;
+const SORT_OPTIONS = {
+  description: { ascending: 'desc-asc', descending: 'desc-desc' },
+  date:        { ascending: 'date-asc', descending: 'date-desc' },
+  category:    { ascending: 'category-asc', descending: 'category-desc' },
+  amount:      { ascending: 'amount-asc', descending: 'amount-desc' },
+};
 
 // Footer
 document.getElementById('footer-year').textContent = new Date().getFullYear();
@@ -108,14 +120,17 @@ function announce(msg, urgent = false) {
 // ── Dashboard ──────────────────────────────────────────────
 export function renderDashboard() {
   const { total, sum, topCat, budgetLeft, cap, trend } = getStats();
-  const { rateEUR } = getSettings();
+  const budgetTotalChanged = sum !== lastBudgetAnnouncementSum;
+  lastBudgetAnnouncementSum = sum;
 
   statTotal.textContent     = total;
   statSum.textContent       = fmt(sum);
   statTopCat.textContent    = topCat;
 
   const left = budgetLeft;
-  statBudgetLeft.textContent = fmt(Math.abs(left));
+  statBudgetLeft.textContent = left < 0
+    ? `Over by ${fmt(Math.abs(left))}`
+    : fmt(left);
   statBudgetLeft.style.color = left < 0 ? 'var(--clr-danger)' : 'var(--clr-success)';
 
   const pct = Math.min((sum / cap) * 100, 100);
@@ -125,9 +140,9 @@ export function renderDashboard() {
   budgetCapLabel.textContent = fmt(cap);
   budgetBarTrack.setAttribute('aria-valuenow', Math.round(pct));
 
-  if (sum > cap) {
+  if (budgetTotalChanged && sum > cap) {
     announce(`Warning: budget exceeded by ${fmt(Math.abs(left))}.`, true);
-  } else if (sum > cap * 0.9) {
+  } else if (budgetTotalChanged && sum > cap * 0.9) {
     announce(`Heads up: only ${fmt(left)} remaining in your budget.`);
   }
 
@@ -136,15 +151,36 @@ export function renderDashboard() {
 
 function renderTrend(trend) {
   const maxAmt = Math.max(...trend.map(d => d.amount), 1);
-  trendChart.innerHTML = trend.map(d => {
+  trendChart.replaceChildren();
+
+  const accessibleList = document.createElement('ul');
+  accessibleList.className = 'sr-only';
+
+  trend.forEach(d => {
     const h = Math.round((d.amount / maxAmt) * 100);
-    return `
-      <div class="trend-bar-wrap">
-        <div class="trend-bar" style="height:${h}%" data-amount="${fmt(d.amount)}"
-             role="presentation" aria-hidden="true"></div>
-        <span class="trend-label">${d.label}</span>
-      </div>`;
-  }).join('');
+    const barWrap = document.createElement('div');
+    barWrap.className = 'trend-bar-wrap';
+
+    const bar = document.createElement('div');
+    bar.className = 'trend-bar';
+    bar.style.height = `${h}%`;
+    bar.dataset.amount = fmt(d.amount);
+    bar.setAttribute('role', 'presentation');
+    bar.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.className = 'trend-label';
+    label.textContent = d.label;
+    label.setAttribute('aria-hidden', 'true');
+    barWrap.append(bar, label);
+    trendChart.append(barWrap);
+
+    const listItem = document.createElement('li');
+    listItem.textContent = `${d.label}: ${fmt(d.amount)}`;
+    accessibleList.append(listItem);
+  });
+
+  trendChart.append(accessibleList);
 }
 
 // ── Transactions ───────────────────────────────────────────
@@ -187,6 +223,8 @@ function getSortedFiltered() {
       case 'date-desc':  return b.date.localeCompare(a.date);
       case 'desc-asc':   return a.description.localeCompare(b.description);
       case 'desc-desc':  return b.description.localeCompare(a.description);
+      case 'category-asc': return a.category.localeCompare(b.category);
+      case 'category-desc':return b.category.localeCompare(a.category);
       case 'amount-asc': return a.amount - b.amount;
       case 'amount-desc':return b.amount - a.amount;
       default:           return 0;
@@ -215,6 +253,17 @@ function renderRecords() {
 }
 
 function buildTable(list, re) {
+  const currentSort = sortSelect.value;
+  const sortHeader = (column, label) => {
+    const options = SORT_OPTIONS[column];
+    const direction = currentSort === options.ascending
+      ? 'ascending'
+      : currentSort === options.descending
+        ? 'descending'
+        : null;
+    const indicator = direction === 'ascending' ? '↑' : direction === 'descending' ? '↓' : '';
+    return `<th aria-sort="${direction || 'none'}"><button data-sort-column="${column}">${label}<span class="sort-indicator" aria-hidden="true">${indicator}</span></button></th>`;
+  };
   const rows = list.map(r => `
     <tr data-id="${r.id}">
       <td>${highlight(r.description, re)}</td>
@@ -232,11 +281,11 @@ function buildTable(list, re) {
       <table class="records-table" aria-label="Transactions">
         <thead>
           <tr>
-            <th><button data-sort="desc-asc">Description</button></th>
-            <th><button data-sort="date-desc">Date</button></th>
-            <th>Category</th>
-            <th><button data-sort="amount-desc">Amount</button></th>
-            <th>Actions</th>
+            ${sortHeader('description', 'Description')}
+            ${sortHeader('date', 'Date')}
+            ${sortHeader('category', 'Category')}
+            ${sortHeader('amount', 'Amount')}
+            <th aria-sort="none">Actions</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -265,11 +314,17 @@ function buildCards(list, re) {
 }
 
 function attachRecordEvents() {
-  // sort via table header buttons
-  recordsContainer.querySelectorAll('[data-sort]').forEach(btn => {
+  recordsContainer.querySelectorAll('[data-sort-column]').forEach(btn => {
     btn.addEventListener('click', () => {
-      sortSelect.value = btn.dataset.sort;
+      const column = btn.dataset.sortColumn;
+      const options = SORT_OPTIONS[column];
+      sortSelect.value = sortSelect.value === options.ascending
+        ? options.descending
+        : options.ascending;
       renderRecords();
+      const nextButton = [...recordsContainer.querySelectorAll('[data-sort-column]')]
+        .find(button => button.dataset.sortColumn === column);
+      if (nextButton) nextButton.focus();
     });
   });
 
@@ -355,6 +410,12 @@ function startEdit(id) {
   editIdInput.value = rec.id;
   fDesc.value       = rec.description;
   fAmount.value     = String(rec.amount);
+  if (![...fCategory.options].some(option => option.value === rec.category)) {
+    const option = document.createElement('option');
+    option.value = rec.category;
+    option.textContent = rec.category;
+    fCategory.add(option);
+  }
   fCategory.value   = rec.category;
   fDate.value       = rec.date;
 
@@ -380,6 +441,44 @@ function resetForm() {
 }
 
 // ── Delete confirm dialog ──────────────────────────────────
+function setupDialog(overlay, { cancelButtonId, confirmButtonId, onConfirm }) {
+  const opener = document.activeElement;
+  const cancelButton = overlay.querySelector(`#${cancelButtonId}`);
+  const confirmButton = overlay.querySelector(`#${confirmButtonId}`);
+
+  const close = () => {
+    if (!overlay.isConnected) return;
+    overlay.remove();
+    if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    else searchInput.focus();
+  };
+
+  document.body.appendChild(overlay);
+  confirmButton.focus();
+
+  cancelButton.addEventListener('click', close);
+  confirmButton.addEventListener('click', () => onConfirm(close));
+  overlay.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      close();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const buttons = [...overlay.querySelectorAll('button:not(:disabled)')];
+    const firstButton = buttons[0];
+    const lastButton = buttons[buttons.length - 1];
+    if (event.shiftKey && document.activeElement === firstButton) {
+      event.preventDefault();
+      lastButton.focus();
+    } else if (!event.shiftKey && document.activeElement === lastButton) {
+      event.preventDefault();
+      firstButton.focus();
+    }
+  });
+}
+
 function confirmDelete(id) {
   const rec = getRecords().find(r => r.id === id);
   if (!rec) return;
@@ -399,20 +498,16 @@ function confirmDelete(id) {
       </div>
     </div>`;
 
-  document.body.appendChild(overlay);
-  document.getElementById('dlg-confirm').focus();
-
-  document.getElementById('dlg-cancel').addEventListener('click', () => overlay.remove());
-  document.getElementById('dlg-confirm').addEventListener('click', () => {
-    deleteRecord(id);
-    overlay.remove();
-    renderTransactions();
-    renderDashboard();
-    announce(`Transaction "${rec.description}" deleted.`);
-  });
-
-  overlay.addEventListener('keydown', e => {
-    if (e.key === 'Escape') overlay.remove();
+  setupDialog(overlay, {
+    cancelButtonId: 'dlg-cancel',
+    confirmButtonId: 'dlg-confirm',
+    onConfirm: close => {
+      deleteRecord(id);
+      renderTransactions();
+      renderDashboard();
+      announce(`Transaction "${rec.description}" deleted.`);
+      close();
+    },
   });
 }
 
@@ -464,6 +559,8 @@ function loadSettingsForm() {
   const s = getSettings();
   sBudgetCap.value  = String(s.budgetCap);
   sRateEUR.value    = String(s.rateEUR);
+  sRateKES.value    = String(s.rateKES);
+  sDisplayCurrency.value = s.displayCurrency;
   sCategories.value = s.categories.join(',');
 }
 
@@ -471,30 +568,44 @@ function handleSettingsSave(e) {
   e.preventDefault();
 
   const capErr  = validateBudgetCap(sBudgetCap.value);
-  const rateErr = validateRate(sRateEUR.value);
+  const rateEURErr = validateRate(sRateEUR.value);
+  const rateKESErr = validateRate(sRateKES.value);
+  const cats = sCategories.value.split(',').map(category => category.trim());
+  let categoryErr = null;
+  cats.forEach(category => {
+    const error = validateCategoryName(category);
+    if (!categoryErr && error) categoryErr = error;
+  });
 
   document.getElementById('err-budget-cap').textContent = capErr || '';
-  document.getElementById('err-rate-eur').textContent   = rateErr || '';
+  document.getElementById('err-rate-eur').textContent   = rateEURErr || '';
+  document.getElementById('err-rate-kes').textContent   = rateKESErr || '';
+  document.getElementById('err-categories').textContent = categoryErr || '';
   sBudgetCap.setAttribute('aria-invalid', capErr ? 'true' : 'false');
-  sRateEUR.setAttribute('aria-invalid', rateErr ? 'true' : 'false');
+  sRateEUR.setAttribute('aria-invalid', rateEURErr ? 'true' : 'false');
+  sRateKES.setAttribute('aria-invalid', rateKESErr ? 'true' : 'false');
+  sCategories.setAttribute('aria-invalid', categoryErr ? 'true' : 'false');
 
-  if (capErr || rateErr) {
+  if (capErr || rateEURErr || rateKESErr || categoryErr) {
     announce('Please fix settings errors.', true);
     return;
   }
 
-  const rawCats = sCategories.value.split(',').map(c => c.trim()).filter(Boolean);
-  const cats    = [...new Set(rawCats)];
+  const uniqueCats = [...new Set(cats)];
 
   updateSettings({
     budgetCap:  parseFloat(sBudgetCap.value),
     rateEUR:    parseFloat(sRateEUR.value),
-    categories: cats,
+    rateKES:    parseFloat(sRateKES.value),
+    displayCurrency: sDisplayCurrency.value,
+    categories: uniqueCats,
   });
 
   // sync category dropdowns
   populateCategoryFilter();
-  syncFormCategories(cats);
+  syncFormCategories(uniqueCats);
+  renderDashboard();
+  renderTransactions();
   announce('Settings saved.');
 }
 
@@ -520,27 +631,35 @@ function confirmClearData() {
       </div>
     </div>`;
 
-  document.body.appendChild(overlay);
-  document.getElementById('dlg-clear-confirm').focus();
-
-  document.getElementById('dlg-clear-cancel').addEventListener('click', () => overlay.remove());
-  document.getElementById('dlg-clear-confirm').addEventListener('click', () => {
-    import('./storage.js').then(({ clearAll }) => {
-      clearAll();
-      import('./state.js').then(({ init }) => {
-        init();
-        overlay.remove();
-        renderDashboard();
-        renderTransactions();
-        loadSettingsForm();
-        announce('All data cleared.', true);
+  setupDialog(overlay, {
+    cancelButtonId: 'dlg-clear-cancel',
+    confirmButtonId: 'dlg-clear-confirm',
+    onConfirm: close => {
+      import('./storage.js').then(({ clearAll }) => {
+        clearAll();
+        import('./state.js').then(({ init }) => {
+          init();
+          renderDashboard();
+          renderTransactions();
+          loadSettingsForm();
+          announce('All data cleared.', true);
+          close();
+        });
       });
-    });
+    },
   });
-
-  overlay.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.remove(); });
 }
 
 // ── Helpers ────────────────────────────────────────────────
-function fmt(n)       { return `$${Number(n).toFixed(2)}`; }
-function fmtAmount(n) { return `$${Number(n).toFixed(2)}`; }
+function fmt(n)       { return formatCurrency(n); }
+function fmtAmount(n) { return formatCurrency(n); }
+
+function formatCurrency(amountUSD) {
+  const { displayCurrency = 'USD', rateEUR = 0.92, rateKES = 129.5 } = getSettings();
+  const rates = { USD: 1, EUR: rateEUR, KES: rateKES };
+  const convertedAmount = Number(amountUSD) * rates[displayCurrency];
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: displayCurrency,
+  }).format(convertedAmount);
+}
