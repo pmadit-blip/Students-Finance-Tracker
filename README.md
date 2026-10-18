@@ -3,6 +3,7 @@
 A fully accessible, responsive, vanilla HTML/CSS/JS single-page application for tracking student spending. No frameworks, no build tools, no dependencies — just clean, modular JavaScript.
 
 **Live Demo:** https://pmadit-blip.github.io/Students-Finance-Tracker/
+**Demo Link:** https://youtu.be/TdFijEu6kWs
 ---
 
 ## Chosen Theme
@@ -168,11 +169,8 @@ Transaction amounts remain stored in USD. Dashboard totals and transaction amoun
 
 ---
 
-## Demo Video
+## What The Demo Video Covers
 
-[Watch Demo Video](YOUR_UNLISTED_YOUTUBE_OR_DRIVE_LINK_HERE)
-
-The video covers:
 - Keyboard-only navigation through all sections
 - Adding, editing and deleting a transaction
 - Regex search edge cases (valid pattern, invalid pattern, case toggle)
