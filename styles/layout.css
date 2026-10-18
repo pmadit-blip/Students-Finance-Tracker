@@ -291,12 +291,29 @@ legend {
   .stats-grid { grid-template-columns: repeat(4, 1fr); }
 
   .toolbar {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
   }
 
-  .search-wrap { flex-direction: row; align-items: center; }
+  .search-wrap {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .search-wrap .search-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .filter-wrap {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .filter-wrap .select-input {
+    flex: 1;
+    min-width: 0;
+  }
 
   .transaction-form,
   .settings-form { max-width: 640px; }
