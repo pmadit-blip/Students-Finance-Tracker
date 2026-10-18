@@ -56,6 +56,8 @@
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -143,8 +145,25 @@ mark {
   min-height: 1.2em;
 }
 
+.settings-form fieldset .form-group { margin-bottom: var(--sp-3); }
+.settings-form fieldset .field-error:empty {
+  min-height: 0;
+  margin-top: 0;
+}
+
 .fieldset-hint {
   font-size: var(--fs-sm);
   color: var(--clr-text-muted);
   margin-bottom: var(--sp-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
