@@ -5,17 +5,23 @@ import { loadRecords, saveRecords, loadSettings, saveSettings } from './storage.
 const DEFAULT_SETTINGS = {
   budgetCap:  1000,
   rateEUR:    0.92,
+  rateKES:    129.5,
+  displayCurrency: 'USD',
   categories: ['Food', 'Books', 'Transport', 'Entertainment', 'Fees', 'Other'],
 };
 
+function createDefaultSettings() {
+  return { ...DEFAULT_SETTINGS, categories: [...DEFAULT_SETTINGS.categories] };
+}
+
 let records  = [];
-let settings = { ...DEFAULT_SETTINGS };
+let settings = createDefaultSettings();
 
 // ── Bootstrap ──────────────────────────────────────────────
 export function init() {
   records  = loadRecords();
   const saved = loadSettings();
-  if (saved) settings = { ...DEFAULT_SETTINGS, ...saved };
+  settings = saved ? { ...DEFAULT_SETTINGS, ...saved } : createDefaultSettings();
 }
 
 // ── ID generator ───────────────────────────────────────────
@@ -125,7 +131,7 @@ export function getStats() {
   const days  = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - (6 - i));
-    return d.toISOString().slice(0, 10);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
 
   const trend = days.map(day => ({
