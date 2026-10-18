@@ -3,7 +3,8 @@
 A fully accessible, responsive, vanilla HTML/CSS/JS single-page application for tracking student spending. No frameworks, no build tools, no dependencies — just clean, modular JavaScript.
 
 **Live Demo:** https://pmadit-blip.github.io/Students-Finance-Tracker/
-**Demo Link:** https://youtu.be/TdFijEu6kWs
+
+**Demo Video Link:** https://youtu.be/TdFijEu6kWs
 ---
 
 ## Chosen Theme
